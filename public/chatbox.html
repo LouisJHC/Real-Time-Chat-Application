@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Time Chat Application</title>
+    <link rel="stylesheet" href="stylesheet.css"></style>
+</head>
+
+
+<body>
+    <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script defer src="js/client.js"></script>
+    <div class="app-container">
+        <header class="app-header">
+          <h1><i class="fas fa-smile"></i> Chatpie</h1>
+        </header>
+        <main class="app-main">
+          <div class="app-sidebar">
+            <h3><i class="fas fa-comments"></i>Room: </h3>
+            <h3 id="room-name">JavaScript</h2>
+            <ul id="users">
+                <li>Louis</li>
+            </ul>
+    </div>
+    <div class="app-messages">
+        <div class="message">
+            <p class="meta">Louis <span>1:20pm</span>&nbsp Random Message</p>
+            <p class="text"></p>
+        </div>
+    </div>
+    </main>    
+    <div class="app-form-container">
+        <form id="app-form">
+          <input id="messageText" type="text"/>
+          <button class="button">Send Message</button>
+        </form>
+      </div>
+    </div>
+</body>
+</html>

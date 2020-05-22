@@ -1,0 +1,25 @@
+{
+  "name": "real-time-chat-application",
+  "version": "1.0.0",
+  "description": "Real Time Chat Application Using Express, Node and Socket.io.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "devStart": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LouisJHC/Real-Time-Chat-Application.git"
+  },
+  "author": "Louis Cha",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LouisJHC/Real-Time-Chat-Application/issues"
+  },
+  "homepage": "https://github.com/LouisJHC/Real-Time-Chat-Application#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.4",
+    "socket.io": "^2.3.0"
+  }
+}
