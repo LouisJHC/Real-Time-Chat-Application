@@ -1,9 +1,9 @@
 const express = require('express');
 const app = express();
-
 const path = require('path');
 const http = require('http');
 const httpServer = http.createServer(app);
+const messageFormatter = require('./utils/message-formatter.js');
 
 const io = require('socket.io')(httpServer);
 
@@ -13,14 +13,10 @@ const PORT = 3000
 app.use(express.static(path.join(__dirname, 'public')))
 
 io.on('connection', socket => {
-    socket.emit('welcome-message', 'Welcome!');
-    socket.on("send-message", (message) => {
-        console.log("Server listening: " + message.message);
-        socket.emit("send-back-message", message.message);
-    })
+    socket.emit('welcome-message', messageFormatter('Welcome!', 'ChatBot'));
 
     socket.on('user-typed-message', (message) => {
-        socket.emit('user-typed-message-send-back', message);
+        socket.broadcast.emit('user-typed-message-send-back', messageFormatter(message, 'User'));
     })
 })
 httpServer.listen(PORT, () => {
