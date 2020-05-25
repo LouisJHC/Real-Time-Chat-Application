@@ -4,8 +4,10 @@ socket.on('welcome-message', message => {
     appendMessages(message);
 })
 
+socket.on('welcome-notification-to-all-others', message => {
+    appendMessages(message);
+})
 socket.on('user-typed-message-send-back', message => {
-    console.log(message)
     appendMessages(message);
 })
 
@@ -43,4 +45,28 @@ function appendMessages(message) {
     appMessages.appendChild(div);
 }
 
+
+const currentURL = window.location.href;
+const userNameAndRoomType = customURLParser(currentURL); 
+// parse the URL and get the userName and the roomType he/she joined
+function customURLParser(currentURL) {
+    let userName = [];
+    let roomType = [];
+    currentURL = currentURL.split('?')[1].split('&');
+
+    for(let i=0;i<currentURL.length;i++) {
+        for(let j=currentURL[i].length-1;j>=0;j--) {
+            if(currentURL[i][j] === '=') break;
+            if(i === 0) {
+                userName.push(currentURL[i][j]);
+            } else {
+                roomType.push(currentURL[i][j]);
+            }
+        }
+    }
+
+    userName = userName.reverse().join("");
+    roomType = roomType.reverse().join("");
+    return { userName: userName, roomType: roomType};
+} 
 

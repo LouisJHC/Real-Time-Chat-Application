@@ -14,6 +14,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 io.on('connection', socket => {
     socket.emit('welcome-message', messageFormatter('Welcome!', 'ChatBot'));
+    socket.broadcast.emit('welcome-notification-to-all-others', messageFormatter('A User Joined the Chat!', 'ChatBot'));
 
     socket.on('user-typed-message', (message) => {
         socket.broadcast.emit('user-typed-message-send-back', messageFormatter(message, 'User'));

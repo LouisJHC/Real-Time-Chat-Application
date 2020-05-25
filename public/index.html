@@ -8,8 +8,20 @@
 </head>
 <body>
     <h2>Index Page</h2>
+
     <form action="chatbox.html">
-        <button class="button" type="submit">Join</button>
+    <label for="userName"></label>
+        <!-- need a name attribute here to send the query string params. Here, name is the key, and value typed/selected is the value-->
+        <input type="text" name="userName" id="userName" required>
+        <select name="roomType" id="select-dropdown">
+            <option>Programming</option>
+            <option>Sport</option>
+            <option>Travel</option>
+            <option>Game</option>
+            <option>Movie</option>
+        </select>
+
+    <button class="button" type="submit">Join</button>
     </form>
 </body>
 </html>
