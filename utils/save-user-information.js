@@ -9,4 +9,20 @@ const saveUserInfo = (userId, userName, roomType) => {
     users.push(user);
     return user;
 }
-module.exports = saveUserInfo;
+
+const getUsersFromTheRoom = (roomType) => {
+    let usersInTheRoom = [];
+    for(let i=0;i<users.length;i++) {
+        if(users[i].roomType == roomType) {
+            usersInTheRoom.push(users[i].userName);
+        }
+    }
+
+    return usersInTheRoom;
+}
+
+
+module.exports = {
+    saveUserInfo,
+    getUsersFromTheRoom
+};

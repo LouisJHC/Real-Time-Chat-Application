@@ -4,7 +4,7 @@ const path = require('path');
 const http = require('http');
 const httpServer = http.createServer(app);
 const messageFormatter = require('./utils/message-formatter');
-const saveUserInfo = require('./utils/save-user-information')
+const { saveUserInfo, getUsersFromTheRoom } = require('./utils/save-user-information')
 
 const io = require('socket.io')(httpServer);
 
@@ -20,21 +20,22 @@ io.on('connection', socket => {
 
         // redirect user to the corresponding chat room, based on their choice.
         socket.join(user.roomType);
+        // show welcome message to all users no matter which chat room they joined.
         socket.emit('welcome-message', messageFormatter('', user.roomType, ''));
-        socket.broadcast.emit('welcome-notification-to-all-others', messageFormatter(' joined the ', user.roomType, user.userName));
-    
-    
-    
-        socket.on('user-typed-message', (message) => {
-            socket.broadcast.emit('user-typed-message-send-back', messageFormatter(message, user.roomType, user.userName));
-        })
-    
-    
-    } )
-  
+        // notify all other users in the specific chat room on who has joined that room.
+        socket.broadcast.to(user.roomType).emit('welcome-notification-to-all-others', messageFormatter(' joined the ', user.roomType, user.userName));
 
-   
+        // only allow communications if users are in the same chat room.
+        socket.on('user-typed-message', (message) => {
+            socket.broadcast.to(user.roomType).emit('user-typed-message-send-back', messageFormatter(message, user.roomType, user.userName));
+        })
+
+        socket.emit('list-of-users-in-the-room', getUsersFromTheRoom(user.roomType)); 
+    }) 
 })
+
 httpServer.listen(PORT, () => {
     console.log("Server is running at port 3000")
 });
+
+

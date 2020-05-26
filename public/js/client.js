@@ -11,6 +11,17 @@ socket.on('user-typed-message-send-back', message => {
     appendMessages(message);
 })
 
+const joinedUsers = document.querySelector('#joined-users');
+
+socket.on('list-of-users-in-the-room', (listOfUsers) => {
+    for(let i=0;i<listOfUsers.length;i++) {
+        ul = document.createElement('ul');
+        ul.classList.add('user-name');
+        ul.innerText = listOfUsers[i];
+        joinedUsers.appendChild(ul);
+    }
+})
+
 const appForm = document.querySelector('#app-form');
 const appMessages = document.querySelector('.app-messages')
 
@@ -98,4 +109,13 @@ function customURLParser(currentURL) {
     return { userName: userName, roomType: roomType};
 } 
 
+const roomName = document.querySelector('#room-name');
+roomName.innerText = roomType;
 socket.emit('send-username-and-roomtype', { userName: userName, roomType: roomType });
+
+// const joinedUsers = document.querySelector('#joined-users');
+// li = document.createElement('li');
+// li.classList.add('user-joined');
+
+// li.innerText = userName;
+// joinedUsers.appendChild(li);
