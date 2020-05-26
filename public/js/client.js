@@ -1,20 +1,18 @@
 const socket = io('localhost:3000');
 
 socket.on('welcome-message', message => {
-    appendMessages(message);
+    appendWelcomeMessage(message);
 })
 
 socket.on('welcome-notification-to-all-others', message => {
-    appendMessages(message);
+    appendWelcomeMessageToAllOthers(message);
 })
 socket.on('user-typed-message-send-back', message => {
     appendMessages(message);
 })
 
-
 const appForm = document.querySelector('#app-form');
 const appMessages = document.querySelector('.app-messages')
-
 
 
 appForm.addEventListener('submit', (event) => {
@@ -28,12 +26,32 @@ appForm.addEventListener('submit', (event) => {
     event.target.elements.messageText.value = '';
 })
 const date = new Date();
+
+function appendWelcomeMessage(message) {
+    div = document.createElement('div');
+    div.classList.add('message');
+
+    div.innerHTML = `<p class="meta"> ChatBot <span> ${message.time}</span></p>
+    <p class="text"></p> Welcome to the ${message.roomType} chat room!`
+
+    appMessages.appendChild(div);
+}
+function appendWelcomeMessageToAllOthers(message) {
+    div = document.createElement('div');
+    div.classList.add('message');
+
+    div.innerHTML = `<p class="meta"> ChatBot <span>${message.time}</span></p>
+                    <p class="text"></p> ${message.userName} has joined the chat [${message.roomType}].`
+
+    
+    appMessages.appendChild(div);               
+}
 function appendMessages(message) {
     div = document.createElement('div');
     div.classList.add('message');
 
     // handling messages that client him/herself sent to the other people.
-    if(message.userName === undefined && message.name === undefined && message.time === undefined) {
+    if(message.userName === undefined && message.name === undefined && message.time === undefined && message.roomType == undefined) {
         div.innerHTML = `<p class="meta"><span></span>Me: ${date}</p>
         <p class="text"></p> ${message}`
     // messages that have been broadcasted from the server.
@@ -46,21 +64,31 @@ function appendMessages(message) {
 }
 
 
+
 const currentURL = window.location.href;
-const userNameAndRoomType = customURLParser(currentURL); 
+const { userName, roomType } = customURLParser(currentURL);
+
 // parse the URL and get the userName and the roomType he/she joined
 function customURLParser(currentURL) {
     let userName = [];
     let roomType = [];
     currentURL = currentURL.split('?')[1].split('&');
-
     for(let i=0;i<currentURL.length;i++) {
         for(let j=currentURL[i].length-1;j>=0;j--) {
             if(currentURL[i][j] === '=') break;
+            // + is to take care of the space entered for the user name.
             if(i === 0) {
-                userName.push(currentURL[i][j]);
+                if(currentURL[i][j] === '+') {
+                    userName.push(' ');
+                } else {
+                    userName.push(currentURL[i][j]);
+                }
             } else {
-                roomType.push(currentURL[i][j]);
+                if(currentURL[i][j] === '+') {
+                    roomType.push(currentURL[i][j]);
+                } else {
+                roomType.push(currentURL[i][j])
+                }
             }
         }
     }
@@ -70,3 +98,4 @@ function customURLParser(currentURL) {
     return { userName: userName, roomType: roomType};
 } 
 
+socket.emit('send-username-and-roomtype', { userName: userName, roomType: roomType });

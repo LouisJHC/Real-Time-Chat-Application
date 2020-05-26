@@ -1,10 +1,11 @@
 const moment = require('moment')
-const messageFormatter = (message, userName) => {
+const messageFormatter = (message, roomType, userName) => {
     return ({
         message,
         userName,
-        time: moment().format()
+        time: moment().format(),
+        roomType
     })
 }
 
-module.exports = messageFormatter
+module.exports = messageFormatter;
