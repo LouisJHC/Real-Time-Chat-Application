@@ -9,6 +9,16 @@
 	padding: 0;
 }
 
+@media (max-width: 700px) {
+	.app-main {
+		display: block;
+	}
+
+	.app-sidebar {
+		display: none;
+	}
+}
+
 body {
 	font-family: 'Roboto', sans-serif;
 	font-size: 16px;
@@ -108,4 +118,56 @@ a {
 	padding: 5px;
 	height: 40px;
 	flex: 1;
+}
+
+.main-container {
+	max-width: 500px;
+	margin: 80px auto;
+	color: rgb(255, 255, 255);
+}
+
+.main-header {
+	text-align: center;
+	padding: 20px;
+	background: var(--dark-color-a);
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+}
+
+.main {
+	padding: 35px 50px;
+	background: var(--dark-color-b);
+}
+
+
+.main label {
+	display: block;
+	margin-bottom: 10px;
+}
+
+.main input[type='text'] {
+	font-size: 16px;
+	padding: 5px;
+	height: 40px;
+	width: 100%;
+}
+
+.main select {
+	font-size: 20px;
+	height: 35px;
+	padding: 3px;
+	width: 100%;
+}
+
+.main .join-btn {
+	height:20px; 
+    width:100px; 
+    margin: -20px -50px; 
+    position:relative;
+    top:50%; 
+    left:50%;	
+}
+
+.main .form-control {
+	margin-bottom: 20px;
 }

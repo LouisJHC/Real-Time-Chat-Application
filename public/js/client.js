@@ -19,10 +19,8 @@ socket.on('user-disconnected', message => {
 const joinedUsers = document.querySelector('#joined-users');
 
 socket.on('list-of-users-in-the-room', (listOfUsers) => {
-    console.log(listOfUsers);
     // only allow the user with the unique name. Thus, when the page is refreshed, it will prevent from adding the same client name to the user list of the chat room multiple times.
     const uniqueListOfUsers = [...new Set(listOfUsers.map(listOfUser => listOfUser.userName))]
-    console.log(uniqueListOfUsers)
     for(let i=0;i<uniqueListOfUsers.length;i++) {
         ul = document.createElement('ul');
         ul.classList.add('user-name');
@@ -40,7 +38,7 @@ appForm.addEventListener('submit', (event) => {
     const message = event.target.elements.messageText.value;
 
     // show the message in the sender's chat box as well.
-    appendMessages(message);
+    appendMessage(message);
     socket.emit('user-typed-message', message);
 
     event.target.elements.messageText.value = '';
