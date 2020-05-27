@@ -8,16 +8,25 @@ socket.on('welcome-notification-to-all-others', message => {
     appendWelcomeMessageToAllOthers(message);
 })
 socket.on('user-typed-message-send-back', message => {
-    appendMessages(message);
+    appendMessage(message);
 })
+
+socket.on('user-disconnected', message => {
+    appendDisconnectMessage(message)
+})
+
 
 const joinedUsers = document.querySelector('#joined-users');
 
 socket.on('list-of-users-in-the-room', (listOfUsers) => {
-    for(let i=0;i<listOfUsers.length;i++) {
+    console.log(listOfUsers);
+    // only allow the user with the unique name. Thus, when the page is refreshed, it will prevent from adding the same client name to the user list of the chat room multiple times.
+    const uniqueListOfUsers = [...new Set(listOfUsers.map(listOfUser => listOfUser.userName))]
+    console.log(uniqueListOfUsers)
+    for(let i=0;i<uniqueListOfUsers.length;i++) {
         ul = document.createElement('ul');
         ul.classList.add('user-name');
-        ul.innerText = listOfUsers[i];
+        ul.innerText = uniqueListOfUsers[i];
         joinedUsers.appendChild(ul);
     }
 })
@@ -36,7 +45,7 @@ appForm.addEventListener('submit', (event) => {
 
     event.target.elements.messageText.value = '';
 })
-const date = new Date();
+
 
 function appendWelcomeMessage(message) {
     div = document.createElement('div');
@@ -47,17 +56,19 @@ function appendWelcomeMessage(message) {
 
     appMessages.appendChild(div);
 }
+
 function appendWelcomeMessageToAllOthers(message) {
     div = document.createElement('div');
     div.classList.add('message');
 
     div.innerHTML = `<p class="meta"> ChatBot <span>${message.time}</span></p>
-                    <p class="text"></p> ${message.userName} has joined the chat [${message.roomType}].`
+                    <p class="text"></p> ${message.userName} ${message.message} [${message.roomType}].`
 
     
     appMessages.appendChild(div);               
 }
-function appendMessages(message) {
+const date = new Date();
+function appendMessage(message) {
     div = document.createElement('div');
     div.classList.add('message');
 
@@ -74,6 +85,15 @@ function appendMessages(message) {
     appMessages.appendChild(div);
 }
 
+function appendDisconnectMessage(message) {
+    div = document.createElement('div');
+    div.classList.add('message');
+
+    div.innerHTML = `<p class="meta"> ChatBot <span> ${message.time}</span></p>
+    <p class="text"></p> ${message.userName} disconnected!`
+
+    appMessages.appendChild(div);
+}
 
 
 const currentURL = window.location.href;
@@ -112,10 +132,3 @@ function customURLParser(currentURL) {
 const roomName = document.querySelector('#room-name');
 roomName.innerText = roomType;
 socket.emit('send-username-and-roomtype', { userName: userName, roomType: roomType });
-
-// const joinedUsers = document.querySelector('#joined-users');
-// li = document.createElement('li');
-// li.classList.add('user-joined');
-
-// li.innerText = userName;
-// joinedUsers.appendChild(li);

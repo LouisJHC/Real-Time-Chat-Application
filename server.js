@@ -23,14 +23,17 @@ io.on('connection', socket => {
         // show welcome message to all users no matter which chat room they joined.
         socket.emit('welcome-message', messageFormatter('', user.roomType, ''));
         // notify all other users in the specific chat room on who has joined that room.
-        socket.broadcast.to(user.roomType).emit('welcome-notification-to-all-others', messageFormatter(' joined the ', user.roomType, user.userName));
+        socket.broadcast.to(user.roomType).emit('welcome-notification-to-all-others', messageFormatter(' has joined the ', user.roomType, user.userName));
 
         // only allow communications if users are in the same chat room.
         socket.on('user-typed-message', (message) => {
             socket.broadcast.to(user.roomType).emit('user-typed-message-send-back', messageFormatter(message, user.roomType, user.userName));
         })
+        socket.emit('list-of-users-in-the-room', getUsersFromTheRoom(user.userId, user.roomType));
 
-        socket.emit('list-of-users-in-the-room', getUsersFromTheRoom(user.roomType)); 
+        socket.on('disconnect', () => {
+            socket.broadcast.to(user.roomType).emit('user-disconnected', messageFormatter('', user.roomType, user.userName));
+        })
     }) 
 })
 
