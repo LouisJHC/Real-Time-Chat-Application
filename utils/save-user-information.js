@@ -5,7 +5,6 @@ const saveUserInfo = (userId, userName, roomType) => {
     user.userId = userId;
     user.userName = userName;
     user.roomType = roomType;
-
     users.push(user);
     return user;
 }
@@ -26,7 +25,20 @@ const getUsersFromTheRoom = (userId, roomType) => {
     return Array.from(usersInTheRoom);
 }
 
+const deleteUserInfo = (userId) => {
+    for(let i=0;i<users.length;i++) {
+        if(users[i] === userId) {
+            users.splice(i, 1);
+        }
+    }
+}
+setTimeout(() => {
+    console.log(users);
+}, 3000)
+
 module.exports = {
     saveUserInfo,
-    getUsersFromTheRoom
+    getUsersFromTheRoom,
+    deleteUserInfo
 };
+

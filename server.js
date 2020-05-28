@@ -4,7 +4,7 @@ const path = require('path');
 const http = require('http');
 const httpServer = http.createServer(app);
 const messageFormatter = require('./utils/message-formatter');
-const { saveUserInfo, getUsersFromTheRoom } = require('./utils/save-user-information')
+const { saveUserInfo, getUsersFromTheRoom, deleteUserInfo } = require('./utils/save-user-information')
 
 const io = require('socket.io')(httpServer);
 
@@ -32,6 +32,8 @@ io.on('connection', socket => {
         socket.emit('list-of-users-in-the-room', getUsersFromTheRoom(user.userId, user.roomType));
 
         socket.on('disconnect', () => {
+            deleteUserInfo(user.userId);
+            socket.emit('list-of-users-in-the-room', getUsersFromTheRoom(user.userId, user.roomType));
             socket.broadcast.to(user.roomType).emit('user-disconnected', messageFormatter('', user.roomType, user.userName));
         })
     }) 
