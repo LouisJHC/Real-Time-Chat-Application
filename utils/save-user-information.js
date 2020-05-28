@@ -32,9 +32,6 @@ const deleteUserInfo = (userId) => {
         }
     }
 }
-setTimeout(() => {
-    console.log(users);
-}, 3000)
 
 module.exports = {
     saveUserInfo,

@@ -8,6 +8,7 @@ const { saveUserInfo, getUsersFromTheRoom, deleteUserInfo } = require('./utils/s
 
 const io = require('socket.io')(httpServer);
 
+const dbConnection = require('./public/config/db-connection');
 
 const PORT = 3000
 
@@ -27,6 +28,13 @@ io.on('connection', socket => {
 
         // only allow communications if users are in the same chat room.
         socket.on('user-typed-message', (message) => {
+            let messageToBeSaved = new Messenger( {
+                userName: user.userName,
+                message: message,
+                roomType: user.roomType,
+                date: user.time
+            });
+            messageToBeSaved.save();
             socket.broadcast.to(user.roomType).emit('user-typed-message-send-back', messageFormatter(message, user.roomType, user.userName));
         })
         socket.emit('list-of-users-in-the-room', getUsersFromTheRoom(user.userId, user.roomType));
@@ -36,6 +44,13 @@ io.on('connection', socket => {
             socket.emit('list-of-users-in-the-room', getUsersFromTheRoom(user.userId, user.roomType));
             socket.broadcast.to(user.roomType).emit('user-disconnected', messageFormatter('', user.roomType, user.userName));
         })
+
+
+        dbConnection().then(db => {
+            console.log('connected to db!');
+        })
+
+
     }) 
 })
 
