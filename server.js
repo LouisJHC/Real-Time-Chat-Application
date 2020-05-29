@@ -8,12 +8,17 @@ const { saveUserInfo, getUsersFromTheRoom, deleteUserInfo } = require('./utils/s
 
 const io = require('socket.io')(httpServer);
 
+const Messenger = require('./public/models/message-schema');
 const dbConnection = require('./public/config/db-connection');
+const mongoose = require('mongoose');
+
+const cors = require('cors')
 
 const PORT = 3000
 
 app.use(express.static(path.join(__dirname, 'public')))
-
+// a middleware to enable CORS.
+app.use(cors());
 io.on('connection', socket => {
     socket.on('send-username-and-roomtype', (userInfo) => {
         // save the user info
@@ -34,7 +39,27 @@ io.on('connection', socket => {
                 roomType: user.roomType,
                 date: user.time
             });
-            messageToBeSaved.save();
+
+            Messenger.find({ userName: user.userName}, function(err, doc) {
+                // if there is no match, create a new document and add it to the collection.
+                if(JSON.stringify(doc) === JSON.stringify([])) {
+                    console.log('create a new document.');
+                    Messenger.create({ userName: user.userName, message: message, roomType: user.roomType, date: user.time});
+                // else, update.
+                } else {
+                    console.log("update a document.");
+                    Messenger.update({ userName: user.userName}, {
+                        $set: {
+                            message: message,
+                            roomType: user.roomType,
+                            date: user.time
+                    }}, function(err, doc) {
+                        console.log(doc);
+                    }
+                    )
+                }
+            })
+
             socket.broadcast.to(user.roomType).emit('user-typed-message-send-back', messageFormatter(message, user.roomType, user.userName));
         })
         socket.emit('list-of-users-in-the-room', getUsersFromTheRoom(user.userId, user.roomType));
@@ -50,6 +75,11 @@ io.on('connection', socket => {
             console.log('connected to db!');
         })
 
+        function getDocuments(name, query, callback) {
+            mongoose.connection.db.collection(name, function(err, item) {
+                item.find({ message: 'hi'}).toArray(callback);
+            })
+        }
 
     }) 
 })
