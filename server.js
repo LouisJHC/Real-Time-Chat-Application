@@ -21,9 +21,8 @@ app.use(express.static(path.join(__dirname, 'public')))
 // a middleware to enable CORS.
 app.use(cors());
 dbConnection()
-
+let user = {}
 io.on('connection', socket => {
-    let user = {};
     socket.on('send-username-and-roomtype', (userInfo) => {
         // save the user info
         user = saveUserInfo(socket.id, userInfo.userName, userInfo.roomType);
@@ -61,10 +60,10 @@ httpServer.listen(PORT, () => {
 });
 
 app.get('/messages', (req, res) => {
-    Messenger.find({}, function(err, doc) {
+    Messenger.find({ userName: user.userName }, function(err, doc) {
     if(err) {
         console.log('Failed to get the messages');
     }
-    res.send(doc);
+        res.send(doc);
     })
 })

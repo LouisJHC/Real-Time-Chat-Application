@@ -135,28 +135,29 @@ const chatLog = document.querySelector('#chatlog-btn');
 
 chatLog.addEventListener('click', (e) => {
     e.preventDefault();
-    let info = '';
-    info = getAllUserMessage();
-    if(info == '') {
+
+    getUserMessage();
+
+});
+
+async function getUserMessage() {
+    const response = await fetch('/messages');
+    const json = await response.json();
+
+    if(JSON.stringify(json) === JSON.stringify([])) {
         const div = document.createElement('div');
         div.classList.add('chatlog');
         div.textContent = "You Have No Messages To Show!";
         document.querySelector('.chatlog-container').appendChild(div);
     } else {
-        info.then(data => data.forEach(i => {
+        json.forEach(i => {
             const div = document.createElement('div');
             div.classList.add('chatlog');
             div.textContent = i.message;
             document.querySelector('.chatlog-container').appendChild(div);
-        }))
+        })
     }
 
-});
-
-async function getAllUserMessage() {
-    const response = await fetch('/messages');
-    const json = await response.json().then(data => data);
-    return json;
 }
 
 
