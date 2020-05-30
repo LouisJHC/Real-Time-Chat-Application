@@ -1,4 +1,4 @@
-const socket = io('localhost:3000');
+const socket = io();
 
 socket.on('welcome-message', message => {
     appendWelcomeMessage(message);
@@ -130,3 +130,33 @@ function customURLParser(currentURL) {
 const roomName = document.querySelector('#room-name');
 roomName.innerText = roomType;
 socket.emit('send-username-and-roomtype', { userName: userName, roomType: roomType });
+
+const chatLog = document.querySelector('#chatlog-btn');
+
+chatLog.addEventListener('click', (e) => {
+    e.preventDefault();
+    let info = '';
+    info = getAllUserMessage();
+    if(info == '') {
+        const div = document.createElement('div');
+        div.classList.add('chatlog');
+        div.textContent = "You Have No Messages To Show!";
+        document.querySelector('.chatlog-container').appendChild(div);
+    } else {
+        info.then(data => data.forEach(i => {
+            const div = document.createElement('div');
+            div.classList.add('chatlog');
+            div.textContent = i.message;
+            document.querySelector('.chatlog-container').appendChild(div);
+        }))
+    }
+
+});
+
+async function getAllUserMessage() {
+    const response = await fetch('/messages');
+    const json = await response.json().then(data => data);
+    return json;
+}
+
+

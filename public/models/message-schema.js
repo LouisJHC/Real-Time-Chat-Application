@@ -6,7 +6,7 @@ const messageSchema = new Schema(
             type: String
         },
         message: {
-            type: String
+            type: String,
         },
         roomType: {
             type: String,
