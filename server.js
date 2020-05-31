@@ -45,23 +45,29 @@ io.on('connection', socket => {
             }
             let result = setMessage(doc.id, message);
     
-            result.then(addMessageToTheList(messageInfo).then(getAllSavedMessages()));
+            // result.then(addMessageToTheList(messageInfo).then(getAllSavedMessages()));
+            result.then(addMessageToTheList(messageInfo));
         })
-    
- 
-
-       
-        socket.broadcast.to(user.roomType).emit('user-typed-message-send-back', messageFormatter(message, user.roomType, user.userName));
+        
+        socket.to(user.roomType).emit('send-back-user-typed-message', messageFormatter(message, user.roomType, user.userName));
         
         })
 
-        app.delete('/messages/delete', (req, res) => {
-            console.log(message);
-            Messenger.deleteOne({ message: message }, function(err, doc) {
+        socket.on('user-typed-message-to-self', (message) => {
+            setTimeout(() => {
+                // console.log(messageInfo.messageId);
+                socket.emit('send-back-user-typed-message-to-self', { message: message, messageId: messageInfo.messageId });
+            }, 3000);
+
+        })
+
+        app.delete('/message/delete/:id', (req, res) => {
+  
+            let messageId = req.params.id;
+            Messenger.deleteOne({ _id: messageId }, function(err, doc) {
             if(err) {
                 console.log("failed to delete the messages!");
-            }
-                console.log('deleted!');   
+            } 
                 res.send(doc);
             })
         })
