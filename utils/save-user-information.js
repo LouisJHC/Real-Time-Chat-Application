@@ -33,9 +33,26 @@ const deleteUserInfo = (userId) => {
     }
 }
 
+let messages = [];
+
+const addMessageToTheList = async (messageInfo) => {
+    let message = {};
+    message.messageId = messageInfo.messageId;
+    message.messageContent = messageInfo.messageContent;
+
+    const result = await messages.push(message);
+
+    return result;
+}
+
+const getAllSavedMessages = () => {
+    console.log(messages);
+}
 module.exports = {
     saveUserInfo,
     getUsersFromTheRoom,
-    deleteUserInfo
+    deleteUserInfo,
+    addMessageToTheList,
+    getAllSavedMessages
 };
 

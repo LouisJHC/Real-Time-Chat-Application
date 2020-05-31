@@ -33,8 +33,8 @@ const appForm = document.querySelector('#app-form');
 const appMessages = document.querySelector('.app-messages')
 
 
-appForm.addEventListener('submit', (event) => {
-    event.preventDefault();
+appForm.addEventListener('submit', (e) => {
+    e.preventDefault();
     const message = event.target.elements.messageText.value;
 
     // show the message in the sender's chat box as well.
@@ -73,7 +73,25 @@ function appendMessage(message) {
     // handling messages that client him/herself sent to the other people.
     if(message.userName === undefined && message.name === undefined && message.time === undefined && message.roomType == undefined) {
         div.innerHTML = `<p class="meta"><span></span>Me: ${date}</p>
-        <p class="text"></p> ${message}`
+        <p class="text"></p> ${message} <button type="submit" id="delete-btn">Delete</button>`
+
+        let deleteBtn;
+        setTimeout(() => {
+            deleteBtn = document.querySelector('#delete-btn');
+            deleteBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                fetch('/messages/delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'          
+                    }
+                })
+                div.innerHTML = '';
+        },3000);
+
+       
+        })
     // messages that have been broadcasted from the server.
     } else {
         div.innerHTML = `<p class="meta">${message.userName} <span>${message.time}</span></p>
