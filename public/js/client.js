@@ -15,6 +15,10 @@ socket.on('send-back-user-typed-message', message => {
     appendMessage(message);
 })
 
+socket.on('send-back-removed-message', removedMessageId => {
+    removeMessageFromOtherClients(removedMessageId);
+})
+
 socket.on('user-disconnected', message => {
     appendDisconnectMessage(message)
 })
@@ -40,12 +44,7 @@ const appMessages = document.querySelector('.app-messages')
 appForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const message = event.target.elements.messageText.value;
-
-    // // show the message in the sender's chat box as well.
-    // appendMessage(message);
-    socket.emit('user-typed-message-to-self', message);
     socket.emit('user-typed-message', message);
-
     event.target.elements.messageText.value = '';
 })
 
@@ -83,7 +82,7 @@ function appendMessageToSelf(message) {
         let deleteBtn = document.createElement('button');
         deleteBtn.classList.add('delete-btn');
     
-        div.innerHTML = `<p class="meta"><span></span>Me: ${date}</p>
+        div.innerHTML = `<p class="meta"><span></span>Me: ${message.time}</p>
         <p class="text"></p> ${message.message}`
 
         deleteBtn.setAttribute('value', message.messageId);
@@ -95,20 +94,19 @@ function appendMessageToSelf(message) {
     
         deleteBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            setTimeout(() => {
                 let messageId = deleteBtn.getAttribute('value');
-                console.log(messageId);
                 fetch('/message/delete/' + messageId, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 }).then(res => res.json()).then(data => console.log(data));
-            }, 3000);
-            
-            // after deleting the corresponding message from the db, remove the message and delete button from the UI.
+ 
+        
+        socket.emit('removed-message', message.messageId);
+            // after deleting the corresponding message from the db, remove the message and delete button from the chat UI of the sender.
             // if i do div.innerHTML = '', deleteBtn.innerHTML = '', the white space will be there in the UI, and the subsequent messages
-            // sent appear after this white space.
+            // sent will appear after this white space.
             appMessages.removeChild(div);
             appMessages.removeChild(deleteBtn);
         })
@@ -122,11 +120,24 @@ function appendMessage(message) {
         // messages that have been broadcasted from the server.
         div.innerHTML = `<p class="meta">${message.userName} <span>${message.time}</span></p>
         <p class="text"></p> ${message.message}`
-        
 
+        // save the messageId in the div tag for later, so if the sender deletes the messages he/she sents (from their chat UI and db), I can find it in other clients' side,
+        // and also delete it from the other connected clients' chat UI. 
+        div.setAttribute('value', message.messageId);
+        
         appMessages.appendChild(div);
     }
 
+function removeMessageFromOtherClients(removedMessageId) {
+    // get the list of all div tags that were appended to their main div tag appMessages.
+    const subDivs = appMessages.getElementsByTagName('div');
+
+    for(i = 0;i<subDivs.length;i++) {
+        if(subDivs[i].getAttribute('value') === removedMessageId) {
+            appMessages.removeChild(subDivs[i]);
+        }
+    }
+}
 
 
 function appendDisconnectMessage(message) {

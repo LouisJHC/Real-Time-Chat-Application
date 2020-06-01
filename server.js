@@ -4,7 +4,7 @@ const path = require('path');
 const http = require('http');
 const httpServer = http.createServer(app);
 const messageFormatter = require('./utils/message-formatter');
-const { saveUserInfo, getUsersFromTheRoom, deleteUserInfo, addMessageToTheList, getAllSavedMessages } = require('./utils/save-user-information')
+const { saveUserInfo, getUsersFromTheRoom, deleteUserInfo } = require('./utils/save-user-information')
 
 const io = require('socket.io')(httpServer);
 
@@ -43,23 +43,14 @@ io.on('connection', socket => {
             if(err) {
                 console.log('Failed to insert data.');
             }
-            let result = setMessage(doc.id, message);
-    
-            // result.then(addMessageToTheList(messageInfo).then(getAllSavedMessages()));
-            result.then(addMessageToTheList(messageInfo));
+            // after creating the document with the provided messsage info in the db, get its unique document id, parse it with other info, and send it back to the sender
+            // and all other users.
+            setMessage(doc.id, message).then(
+                socket.to(user.roomType).emit('send-back-user-typed-message', messageFormatter(message, user.roomType, user.userName, messageInfo.messageId)),
+                socket.emit('send-back-user-typed-message-to-self', messageFormatter(message, user.roomType, user.userName, messageInfo.messageId)))
+            })
         })
         
-        socket.to(user.roomType).emit('send-back-user-typed-message', messageFormatter(message, user.roomType, user.userName));
-        
-        })
-
-        socket.on('user-typed-message-to-self', (message) => {
-            setTimeout(() => {
-                // console.log(messageInfo.messageId);
-                socket.emit('send-back-user-typed-message-to-self', { message: message, messageId: messageInfo.messageId });
-            }, 3000);
-
-        })
 
         app.delete('/message/delete/:id', (req, res) => {
   
@@ -70,8 +61,12 @@ io.on('connection', socket => {
             } 
                 res.send(doc);
             })
+
         })
         
+        socket.on('removed-message', (removedMessageId) => {
+            socket.broadcast.to(user.roomType).emit('send-back-removed-message', removedMessageId);
+        })
 
         socket.on('disconnect', () => {
             deleteUserInfo(user.userId);
@@ -97,7 +92,7 @@ httpServer.listen(PORT, () => {
 
 async function setMessage(messageId, message) {
     messageInfo.messageId = messageId;
-    messageInfo.messageContent =message;
+    messageInfo.messageContent = message;
 
     return messageInfo;
 }

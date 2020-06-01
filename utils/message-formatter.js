@@ -1,10 +1,11 @@
 const moment = require('moment')
-const messageFormatter = (message, roomType, userName) => {
+const messageFormatter = (message, roomType, userName, messageId) => {
     return ({
         message,
         userName,
         time: moment().format(),
-        roomType
+        roomType,
+        messageId
     })
 }
 
