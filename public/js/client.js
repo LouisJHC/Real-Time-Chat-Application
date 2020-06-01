@@ -1,11 +1,17 @@
 const socket = io();
-
+let currentUser;
 socket.on('welcome-message', (message) => {
     appendWelcomeMessage(message);
 })
 
 socket.on('welcome-notification-to-all-others', (message) => {
     appendWelcomeMessageToAllOthers(message);
+})
+
+
+// with the user information, when the user wants to view all the messages he/she has sent so far, it will send the get request to the server, and query the db.
+socket.on('current-user', (user) => {
+    currentUser = user;
 })
 
 socket.on('send-back-user-typed-message-to-self', (message) => {
@@ -22,7 +28,6 @@ socket.on('send-back-removed-message', (removedMessageId) => {
 socket.on('user-disconnected', (userInfo) => {
     appendDisconnectMessage(userInfo)
 })
-
 
 const joinedUsers = document.querySelector('#joined-users');
 
@@ -69,10 +74,6 @@ function appendWelcomeMessageToAllOthers(message) {
     
     appMessages.appendChild(div);               
 }
-
-
-
-const date = new Date();
 
 // handling messages that client him/herself sent to the other people.
 function appendMessageToSelf(message) {
@@ -196,32 +197,42 @@ roomName.innerText = roomType;
 socket.emit('send-username-and-roomtype', { userName: userName, roomType: roomType });
 
 const chatLog = document.querySelector('#chatlog-btn');
-
-chatLog.addEventListener('click', (e) => {
-    e.preventDefault();
-
-    getUserMessage();
-
+    chatLog.addEventListener('click', (e) => {
+        e.preventDefault();
+        getUserMessage(currentUser.userName, currentUser.roomType);
 });
 
-async function getUserMessage() {
-    const response = await fetch('/messages');
-    const json = await response.json();
 
+async function getUserMessage(userName, roomType) {
+    const response = await fetch(`/message/${userName}/${roomType}`, {
+        Method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    const json = await response.json();
     if(JSON.stringify(json) === JSON.stringify([])) {
+        // first clear localStorage from the previous session, if there was any. I could have used sessionStorage instead, in which the data persist over page reloads, and
+        // each new window opened initiates a new session.
+       localStorage.clear();
         const div = document.createElement('div');
         div.classList.add('chatlog');
-        div.textContent = "You Have No Messages To Show!";
+        div.innerText = "You Have No Messages To Show!";
+        setTimeout(() => {
+            div.innerText = '';
+        }, 3000);
         document.querySelector('.chatlog-container').appendChild(div);
     } else {
+        let showAllMessages = [];
         json.forEach(i => {
-            const div = document.createElement('div');
-            div.classList.add('chatlog');
-            div.textContent = i.message;
-            document.querySelector('.chatlog-container').appendChild(div);
+            showAllMessages.push(i.message);
         })
-    }
+        // localStorage only handles strings, so I need to turn the array into string format, and then parse it later.
+        localStorage.setItem('key', JSON.stringify(showAllMessages));
 
+        // after storing the user messages, redirect user to the page.
+        window.location='user-messages.html'
+    }
 }
 
 

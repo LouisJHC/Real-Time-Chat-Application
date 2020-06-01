@@ -29,10 +29,14 @@ io.on('connection', socket => {
         let user = saveUserInfo(socket.id, userInfo.userName, userInfo.roomType);
         // redirect user to the corresponding chat room, based on their choice.
         socket.join(user.roomType);
+
         // show welcome message to all users no matter which chat room they joined.
         socket.emit('welcome-message', messageFormatter('', user.roomType, ''));
+
         // notify all other users in the specific chat room on who has joined that room.
         socket.broadcast.to(user.roomType).emit('welcome-notification-to-all-others', messageFormatter(' has joined the ', user.roomType, user.userName));
+
+        socket.emit('current-user', user);
 
         socket.emit('list-of-users-in-the-room', getUsersFromTheRoom(user.userId, user.roomType));
         // only allow communications if users are in the same chat room.
@@ -74,8 +78,11 @@ io.on('connection', socket => {
             deleteUserInfo(user.userId);
         })
 
-        app.get('/messages', (req, res) => {
-            Messenger.find({ userName: user.userName }, function(err, doc) {
+        // I am receiving the room type here as well, since the user messages in each chat room should be separate from each other.
+        app.get('/message/:userName/:roomType', (req, res) => {
+            let userName = req.params.userName;
+            let roomType = req.params.roomType;
+            Messenger.find({ userName: userName, roomType: roomType }, function(err, doc) {
             if(err) {
                 console.log('Failed to get the messages');
             }
