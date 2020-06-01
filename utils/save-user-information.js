@@ -22,12 +22,12 @@ const getUsersFromTheRoom = (userId, roomType) => {
             usersInTheRoom.push(user);
         }
     }
-    return Array.from(usersInTheRoom);
+    return usersInTheRoom;
 }
 
 const deleteUserInfo = (userId) => {
     for(let i=0;i<users.length;i++) {
-        if(users[i] === userId) {
+        if(users[i].userId === userId) {
             users.splice(i, 1);
         }
     }

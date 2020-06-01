@@ -1,26 +1,26 @@
 const socket = io();
 
-socket.on('welcome-message', message => {
+socket.on('welcome-message', (message) => {
     appendWelcomeMessage(message);
 })
 
-socket.on('welcome-notification-to-all-others', message => {
+socket.on('welcome-notification-to-all-others', (message) => {
     appendWelcomeMessageToAllOthers(message);
 })
 
-socket.on('send-back-user-typed-message-to-self', message => {
+socket.on('send-back-user-typed-message-to-self', (message) => {
     appendMessageToSelf(message);
 })
-socket.on('send-back-user-typed-message', message => {
+socket.on('send-back-user-typed-message', (message) => {
     appendMessage(message);
 })
 
-socket.on('send-back-removed-message', removedMessageId => {
+socket.on('send-back-removed-message', (removedMessageId) => {
     removeMessageFromOtherClients(removedMessageId);
 })
 
-socket.on('user-disconnected', message => {
-    appendDisconnectMessage(message)
+socket.on('user-disconnected', (userInfo) => {
+    appendDisconnectMessage(userInfo)
 })
 
 
@@ -100,7 +100,7 @@ function appendMessageToSelf(message) {
                     headers: {
                         'Content-Type': 'application/json'
                     }
-                }).then(res => res.json()).then(data => console.log(data));
+                });
  
         
         socket.emit('removed-message', message.messageId);
@@ -132,7 +132,7 @@ function removeMessageFromOtherClients(removedMessageId) {
     // get the list of all div tags that were appended to their main div tag appMessages.
     const subDivs = appMessages.getElementsByTagName('div');
 
-    for(i = 0;i<subDivs.length;i++) {
+    for(let i=0;i<subDivs.length;i++) {
         if(subDivs[i].getAttribute('value') === removedMessageId) {
             appMessages.removeChild(subDivs[i]);
         }
@@ -140,13 +140,20 @@ function removeMessageFromOtherClients(removedMessageId) {
 }
 
 
-function appendDisconnectMessage(message) {
+function appendDisconnectMessage(userInfo) {
     div = document.createElement('div');
     div.classList.add('message');
 
-    div.innerHTML = `<p class="meta"> ChatBot <span> ${message.time}</span></p>
-    <p class="text"></p> ${message.userName} disconnected!`
+    div.innerHTML = `<p class="meta"> ChatBot <span> ${userInfo.time}</span></p>
+    <p class="text"></p> ${userInfo.userName} disconnected!`
 
+    // removes disconnected user's name in the user list.
+    const subDivs = joinedUsers.getElementsByTagName('ul');
+    for(let i=0;i<subDivs.length;i++) {
+        if(subDivs[i].innerText === userInfo.userName) {
+            joinedUsers.removeChild(subDivs[i]);
+        }
+    }
     appMessages.appendChild(div);
 }
 

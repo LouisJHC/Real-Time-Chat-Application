@@ -33,6 +33,7 @@ io.on('connection', socket => {
         socket.emit('welcome-message', messageFormatter('', user.roomType, ''));
         // notify all other users in the specific chat room on who has joined that room.
         socket.broadcast.to(user.roomType).emit('welcome-notification-to-all-others', messageFormatter(' has joined the ', user.roomType, user.userName));
+
         socket.emit('list-of-users-in-the-room', getUsersFromTheRoom(user.userId, user.roomType));
         // only allow communications if users are in the same chat room.
     
@@ -69,9 +70,8 @@ io.on('connection', socket => {
         })
 
         socket.on('disconnect', () => {
+            socket.broadcast.to(user.roomType).emit('user-disconnected', messageFormatter('', user.roomType, user.userName, ''));
             deleteUserInfo(user.userId);
-            socket.emit('list-of-users-in-the-room', getUsersFromTheRoom(user.userId, user.roomType));
-            socket.broadcast.to(user.roomType).emit('user-disconnected', messageFormatter('', user.roomType, user.userName));
         })
 
         app.get('/messages', (req, res) => {
