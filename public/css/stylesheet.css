@@ -171,3 +171,51 @@ a {
 .main .form-control {
 	margin-bottom: 20px;
 }
+
+.modal {
+	display: none; /* Hidden by default */
+	position: fixed; /* Stay in place */
+	left: 50%;
+	top: 50%;
+	z-index: 5;
+	overflow: auto; /* Enable scroll if needed */
+	transform: translate(-50%, -50%);
+	background-color: white; /* Fallback color */
+	border: 1px solid black;
+  }
+  
+.modal-header {
+	padding: 10px 15px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid black;
+
+  }
+
+.modal-header .modal-title {
+	font-size: 1rem;
+	padding: 10px 15px;
+	font-weight: bold;
+	text-align: center;
+
+}
+.modal-container-1 {
+	background-color: #fa393905;
+	padding: 20px;
+	width: 100%;
+  }
+
+.modal-container-2 {
+	background-color: #fa393905;
+	margin-top: -45px;
+	padding: 20px;
+	width: 100%;
+}
+  
+  /* The Close Button */
+.modal-close-btn {
+	color: #8df13a;
+	font-size: 20px;
+}
+  

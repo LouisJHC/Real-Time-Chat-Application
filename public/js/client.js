@@ -25,6 +25,10 @@ socket.on('send-back-removed-message', (removedMessageId) => {
     removeMessageFromOtherClients(removedMessageId);
 })
 
+socket.on('send-back-removed-message-from-the-pop-up-to-self', (removedMessageId) => {
+    removeMessageFromSelf(removedMessageId);
+})
+
 socket.on('user-disconnected', (userInfo) => {
     appendDisconnectMessage(userInfo)
 })
@@ -86,6 +90,10 @@ function appendMessageToSelf(message) {
         div.innerHTML = `<p class="meta"><span></span>Me: ${message.time}</p>
         <p class="text"></p> ${message.message}`
 
+        div.setAttribute('value', message.messageId);
+
+        // set the value of delete button to messageId as well, so when the user deletes the messages from the pop-up,
+        // I can delete the corresponding delete button as well.
         deleteBtn.setAttribute('value', message.messageId);
         deleteBtn.setAttribute('type', 'submit');
         deleteBtn.innerHTML = 'Delete';
@@ -95,7 +103,7 @@ function appendMessageToSelf(message) {
     
         deleteBtn.addEventListener('click', (e) => {
             e.preventDefault();
-                let messageId = deleteBtn.getAttribute('value');
+                let messageId = div.getAttribute('value');
                 fetch('/message/delete/' + messageId, {
                     method: 'DELETE',
                     headers: {
@@ -104,7 +112,7 @@ function appendMessageToSelf(message) {
                 });
  
         
-        socket.emit('removed-message', message.messageId);
+            socket.emit('removed-message', message.messageId);
             // after deleting the corresponding message from the db, remove the message and delete button from the chat UI of the sender.
             // if i do div.innerHTML = '', deleteBtn.innerHTML = '', the white space will be there in the UI, and the subsequent messages
             // sent will appear after this white space.
@@ -132,10 +140,32 @@ function appendMessage(message) {
 function removeMessageFromOtherClients(removedMessageId) {
     // get the list of all div tags that were appended to their main div tag appMessages.
     const subDivs = appMessages.getElementsByTagName('div');
-
     for(let i=0;i<subDivs.length;i++) {
         if(subDivs[i].getAttribute('value') === removedMessageId) {
             appMessages.removeChild(subDivs[i]);
+        }
+    }
+}
+
+
+function removeMessageFromSelf(removedMessageId) {
+    console.log(removedMessageId);
+    // get the list of all div tags that were appended to their main div tag appMessages.
+    const subDivs = appMessages.getElementsByTagName('div');
+
+    // this is from the sender's UI, so I need to delete the delete button as well.
+    const subButtons = appMessages.getElementsByTagName('button');
+
+    for(let i=0;i<subDivs.length;i++) {
+        console.log(subButtons[i]);
+        if(subDivs[i].getAttribute('value') === removedMessageId) {
+            appMessages.removeChild(subDivs[i] );
+        }
+    }
+
+    for(let i=0;i<subButtons.length;i++) {
+        if(subButtons[i].getAttribute('value') === removedMessageId) {
+            appMessages.removeChild(subButtons[i]);
         }
     }
 }
@@ -196,11 +226,21 @@ const roomName = document.querySelector('#room-name');
 roomName.innerText = roomType;
 socket.emit('send-username-and-roomtype', { userName: userName, roomType: roomType });
 
+const modal = document.querySelector('.modal');
 const chatLog = document.querySelector('#chatlog-btn');
-    chatLog.addEventListener('click', (e) => {
-        e.preventDefault();
-        getUserMessage(currentUser.userName, currentUser.roomType);
+const modalCloseBtn = document.querySelector('.modal-close-btn');
+
+chatLog.addEventListener('click', (e) => {
+    e.preventDefault();
+    modal.style.display = 'block';
+    getUserMessage(currentUser.userName, currentUser.roomType);
 });
+
+
+modalCloseBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    modal.style.display = 'none';
+}) 
 
 
 async function getUserMessage(userName, roomType) {
@@ -212,27 +252,48 @@ async function getUserMessage(userName, roomType) {
     });
     const json = await response.json();
     if(JSON.stringify(json) === JSON.stringify([])) {
-        // first clear localStorage from the previous session, if there was any. I could have used sessionStorage instead, in which the data persist over page reloads, and
-        // each new window opened initiates a new session.
-       localStorage.clear();
-        const div = document.createElement('div');
-        div.classList.add('chatlog');
-        div.innerText = "You Have No Messages To Show!";
+        const chatLogContainer1 = document.querySelector('.modal-container-1');
+        const li = document.createElement('li');
+        li.classList.add('chatlog');
+        li.innerText = "You Have No Messages To Show!";
+        chatLogContainer1.appendChild(li);
         setTimeout(() => {
-            div.innerText = '';
+            chatLogContainer1.removeChild(li);
         }, 3000);
-        document.querySelector('.chatlog-container').appendChild(div);
     } else {
-        let showAllMessages = [];
+        const chatLogContainer2 = document.querySelector('.modal-container-2');
+        // reset the innerHTML of the chatLogContainer2, since below forEach loop fetches all messages that user has sent everytime
+        // the modal pop-up is clicked, so the duplicate messages will be appended to the list if innerHTML is not reset.
+        chatLogContainer2.innerHTML = '';
         json.forEach(i => {
-            showAllMessages.push(i.message);
-        })
-        // localStorage only handles strings, so I need to turn the array into string format, and then parse it later.
-        localStorage.setItem('key', JSON.stringify(showAllMessages));
+            const li = document.createElement('li');
+            li.classList.add('chatlog');
+            li.innerText = i.message;
 
-        // after storing the user messages, redirect user to the page.
-        window.location='user-messages.html'
+            let deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('delete-btn');
+    
+            deleteBtn.setAttribute('value', i._id);
+            deleteBtn.setAttribute('type', 'submit');
+            deleteBtn.innerHTML = 'Delete';
+            chatLogContainer2.appendChild(li);
+            chatLogContainer2.appendChild(deleteBtn);
+
+            deleteBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                    let messageId = deleteBtn.getAttribute('value');
+                    fetch('/message/delete/' + messageId, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+     
+                socket.emit('removed-message-from-the-pop-up', i._id);
+                socket.emit('removed-message', i._id);
+                chatLogContainer2.removeChild(li);
+                chatLogContainer2.removeChild(deleteBtn);
+            })
+        })
     }
 }
-
-

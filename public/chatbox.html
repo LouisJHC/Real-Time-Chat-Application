@@ -43,8 +43,24 @@
         </form>
       </div>
     </div>
-    <div class="chatlog-container">
-      <div class='chatlog'></div>
+    <!-- For showing the message does not exist. It doesn't need to be numbered, so ul is used here.-->
+    <ul class="chatlog-container-1">
+    </ul>
+    <!-- For actually listing out all the messages the user has sent so far.-->
+    <ol class="chatlog-container-2">
+    </ol>
+
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          List of Messages Sent
+        </div>
+        <button data-close-button class="modal-close-btn">&times;</button>
+      </div>
+      <ul class="modal-container-1">
+      </ul>
+      <ol class="modal-container-2">
+      </ol>
     </div>
   </div>
  
