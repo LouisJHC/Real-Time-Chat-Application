@@ -71,7 +71,8 @@ io.on('connection', socket => {
         
         // when the user deleted his/her messages in the chat box.
         socket.on('removed-message', (removedMessageId) => {
-            socket.broadcast.to(user.roomType).emit('send-back-removed-message', removedMessageId);
+            // socket.broadcast.to(user.roomType).emit('send-back-removed-message', removedMessageId);
+            io.to(user.roomType).emit('send-back-removed-message', removedMessageId);
         })
 
         // this is when the user deleted his/her messages from the pop-up that shows list of all messages they have sent so far.

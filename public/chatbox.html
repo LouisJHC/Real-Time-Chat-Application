@@ -29,41 +29,37 @@
             <ul id="joined-users">
                 <li class="user-name"></li>
             </ul>
-    </div>
-    <div class="app-messages">
-        <div class="message">
-            <p class="text"></p>
+          </div>
+          <div class="app-messages">
+              <div class="message">
+                  <p class="text"></p>
+              </div>
+          </div>
+        </main>    
+        <div class="app-form-container">
+          <form id="app-form">
+            <input id="messageText" type="text"/>
+            <button class="button">Send Message</button>
+          </form>
         </div>
     </div>
-    </main>    
-    <div class="app-form-container">
-        <form id="app-form">
-          <input id="messageText" type="text"/>
-          <button class="button">Send Message</button>
-        </form>
-      </div>
-    </div>
-    <!-- For showing the message does not exist. It doesn't need to be numbered, so ul is used here.-->
-    <ul class="chatlog-container-1">
-    </ul>
-    <!-- For actually listing out all the messages the user has sent so far.-->
-    <ol class="chatlog-container-2">
-    </ol>
+
 
     <div class="modal" id="modal">
       <div class="modal-header">
-        <div class="modal-title">
-          List of Messages Sent
-        </div>
+        <div class="modal-title"> List of Messages Sent</div>
         <button data-close-button class="modal-close-btn">&times;</button>
       </div>
-      <ul class="modal-container-1">
-      </ul>
-      <ol class="modal-container-2">
-      </ol>
+      <div>
+        <!-- For showing the message does not exist. It doesn't need to be numbered, so ul is used here.-->
+        <ul class="modal-container-1">
+        </ul>
+        <!-- For actually listing out all the messages the user has sent so far.-->
+        <ol class="modal-container-2">
+          <li>One</li>
+        </ol>
+      </div>
     </div>
-  </div>
- 
 
 </body>
 </html>

@@ -8,7 +8,6 @@ socket.on('welcome-notification-to-all-others', (message) => {
     appendWelcomeMessageToAllOthers(message);
 })
 
-
 // with the user information, when the user wants to view all the messages he/she has sent so far, it will send the get request to the server, and query the db.
 socket.on('current-user', (user) => {
     currentUser = user;
@@ -22,6 +21,7 @@ socket.on('send-back-user-typed-message', (message) => {
 })
 
 socket.on('send-back-removed-message', (removedMessageId) => {
+    removeMessageFromThePopUp(removedMessageId);
     removeMessageFromOtherClients(removedMessageId);
 })
 
@@ -90,11 +90,14 @@ function appendMessageToSelf(message) {
         div.innerHTML = `<p class="meta"><span></span>Me: ${message.time}</p>
         <p class="text"></p> ${message.message}`
 
-        div.setAttribute('value', message.messageId);
+        div.setAttribute('messageId', message.messageId);
 
-        // set the value of delete button to messageId as well, so when the user deletes the messages from the pop-up,
-        // I can delete the corresponding delete button as well.
-        deleteBtn.setAttribute('value', message.messageId);
+        // add this message instantly to the pop-up window as well. This change will be noticeable only if the pop is already opened
+        // and the user typed in a new message.
+        getUserMessage(currentUser.userName, currentUser.roomType); 
+
+        // This is for when the user deletes the messages from the pop-up, the corresponding delete buttons can be deleted as well.
+        deleteBtn.setAttribute('messageId', message.messageId);
         deleteBtn.setAttribute('type', 'submit');
         deleteBtn.innerHTML = 'Delete';
 
@@ -103,7 +106,7 @@ function appendMessageToSelf(message) {
     
         deleteBtn.addEventListener('click', (e) => {
             e.preventDefault();
-                let messageId = div.getAttribute('value');
+                let messageId = div.getAttribute('messageId');
                 fetch('/message/delete/' + messageId, {
                     method: 'DELETE',
                     headers: {
@@ -117,7 +120,7 @@ function appendMessageToSelf(message) {
             // if i do div.innerHTML = '', deleteBtn.innerHTML = '', the white space will be there in the UI, and the subsequent messages
             // sent will appear after this white space.
             appMessages.removeChild(div);
-            appMessages.removeChild(deleteBtn);
+            appMessages.removeChild(deleteBtn);     
         })
 
     }
@@ -132,52 +135,19 @@ function appendMessage(message) {
 
         // save the messageId in the div tag for later, so if the sender deletes the messages he/she sents (from their chat UI and db), I can find it in other clients' side,
         // and also delete it from the other connected clients' chat UI. 
-        div.setAttribute('value', message.messageId);
+        div.setAttribute('messageId', message.messageId);
         
         appMessages.appendChild(div);
-    }
-
-function removeMessageFromOtherClients(removedMessageId) {
-    // get the list of all div tags that were appended to their main div tag appMessages.
-    const subDivs = appMessages.getElementsByTagName('div');
-    for(let i=0;i<subDivs.length;i++) {
-        if(subDivs[i].getAttribute('value') === removedMessageId) {
-            appMessages.removeChild(subDivs[i]);
-        }
-    }
-}
-
-
-function removeMessageFromSelf(removedMessageId) {
-    console.log(removedMessageId);
-    // get the list of all div tags that were appended to their main div tag appMessages.
-    const subDivs = appMessages.getElementsByTagName('div');
-
-    // this is from the sender's UI, so I need to delete the delete button as well.
-    const subButtons = appMessages.getElementsByTagName('button');
-
-    for(let i=0;i<subDivs.length;i++) {
-        console.log(subButtons[i]);
-        if(subDivs[i].getAttribute('value') === removedMessageId) {
-            appMessages.removeChild(subDivs[i] );
-        }
-    }
-
-    for(let i=0;i<subButtons.length;i++) {
-        if(subButtons[i].getAttribute('value') === removedMessageId) {
-            appMessages.removeChild(subButtons[i]);
-        }
-    }
 }
 
 
 function appendDisconnectMessage(userInfo) {
     div = document.createElement('div');
     div.classList.add('message');
-
+    
     div.innerHTML = `<p class="meta"> ChatBot <span> ${userInfo.time}</span></p>
     <p class="text"></p> ${userInfo.userName} disconnected!`
-
+    
     // removes disconnected user's name in the user list.
     const subDivs = joinedUsers.getElementsByTagName('ul');
     for(let i=0;i<subDivs.length;i++) {
@@ -187,6 +157,39 @@ function appendDisconnectMessage(userInfo) {
     }
     appMessages.appendChild(div);
 }
+function removeMessageFromOtherClients(removedMessageId) {
+    // get the list of all div tags that were appended to their main div tag appMessages.
+    const subDivs = appMessages.getElementsByTagName('div');
+    for(let i=0;i<subDivs.length;i++) {
+        if(subDivs[i].getAttribute('messageId') === removedMessageId) {
+            appMessages.removeChild(subDivs[i]);
+        }
+    }
+}
+
+
+function removeMessageFromSelf(removedMessageId) {
+    // get the list of all div tags that were appended to their main div tag appMessages.
+    const subDivs = appMessages.getElementsByTagName('div');
+
+    // this is from the sender's UI, so I need to delete the delete button as well.
+    const subButtons = appMessages.getElementsByTagName('button');
+
+    for(let i=0;i<subDivs.length;i++) {
+        if(subDivs[i].getAttribute('messageId') === removedMessageId) {
+            appMessages.removeChild(subDivs[i] );
+        }
+    }
+
+    for(let i=0;i<subButtons.length;i++) {
+        if(subButtons[i].getAttribute('messageId') === removedMessageId) {
+            appMessages.removeChild(subButtons[i]);
+        }
+    }
+}
+
+
+
 
 
 const currentURL = window.location.href;
@@ -243,6 +246,37 @@ modalCloseBtn.addEventListener('click', (e) => {
 }) 
 
 
+// when the user deletes the message from his/her chat, it should also be removed from the modal pop-up right away, 
+// where it shows the list of messages sent.
+function removeMessageFromThePopUp(removedMessageId) {
+    // no need to call getUserMessage() here again, because this function is to take care of the case where the user
+    // already opened up the pop-up, which means the pop-up will already be populated with list of all messages from that user.
+    // Thus, while the pop-up is opened, if the user deletes the messages from the chat UI, the changes will be reflected in the
+    // pop-up instantly.
+
+    const chatLogContainer2 = document.querySelector('.modal-container-2');
+
+    // get the list of all div tags that were appended to their main div tag appMessages.
+    const subDivs = chatLogContainer2.getElementsByTagName('li');
+
+    // this is from the sender's UI, so I need to delete the delete button as well.
+    const subButtons = chatLogContainer2.getElementsByTagName('button');
+
+    for(let i=0;i<subDivs.length;i++) {
+        if(subDivs[i].getAttribute('messageId') === removedMessageId) {
+            chatLogContainer2.removeChild(subDivs[i] );
+        }
+    }
+
+    for(let i=0;i<subButtons.length;i++) {
+        if(subButtons[i].getAttribute('messageId') === removedMessageId) {
+            chatLogContainer2.removeChild(subButtons[i]);
+        }
+    }
+}
+
+
+
 async function getUserMessage(userName, roomType) {
     const response = await fetch(`/message/${userName}/${roomType}`, {
         Method: 'GET',
@@ -270,10 +304,13 @@ async function getUserMessage(userName, roomType) {
             li.classList.add('chatlog');
             li.innerText = i.message;
 
+            // // set the unique id for the messageId attribute for li to delete it from the modal pop-up if the user deletes it from their own chat UI as well.
+            li.setAttribute('messageId', i._id);
+    
             let deleteBtn = document.createElement('button');
             deleteBtn.classList.add('delete-btn');
     
-            deleteBtn.setAttribute('value', i._id);
+            deleteBtn.setAttribute('messageId', i._id);
             deleteBtn.setAttribute('type', 'submit');
             deleteBtn.innerHTML = 'Delete';
             chatLogContainer2.appendChild(li);
@@ -281,7 +318,7 @@ async function getUserMessage(userName, roomType) {
 
             deleteBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                    let messageId = deleteBtn.getAttribute('value');
+                    let messageId = deleteBtn.getAttribute('messageId');
                     fetch('/message/delete/' + messageId, {
                         method: 'DELETE',
                         headers: {
