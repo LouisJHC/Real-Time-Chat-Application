@@ -5,24 +5,33 @@ const http = require('http');
 const httpServer = http.createServer(app);
 const messageFormatter = require('./utils/message-formatter');
 const { saveUserInfo, getUsersFromTheRoom, deleteUserInfo } = require('./utils/save-user-information')
-
 const io = require('socket.io')(httpServer);
 
+// ejs set up. app.use('layout') should come first.
+app.use(require('express-ejs-layouts'));
+app.set('view engine', 'ejs');
 
-const PORT = 5500
+// DB configuration
+const Messenger = require('./models/message-schema');
+const dbConnection = require('./config/db-connection');
+dbConnection()
 
-const Messenger = require('./public/models/message-schema');
-const dbConnection = require('./public/config/db-connection');
-const mongoose = require('mongoose');
-
+// CORS 
 const cors = require('cors')
-
-app.use(express.static(path.join(__dirname, 'public')))
-// a middleware to enable CORS.
 app.use(cors());
 
-dbConnection()
+// to get the form data with req.body. This line should come above the routing setup below.
+app.use(express.urlencoded({ extended: false}));
+
+app.use(express.static(path.join(__dirname, 'public')))
+// Routing. The router should come after static line above, so that staic files will handled first.
+app.use('/', require('./public/js/user'));
+app.use('/user', require('./public/js/user'));
+
+
+
 let messageInfo = {};
+// Socket Communications
 io.on('connection', socket => {
     socket.on('send-username-and-roomtype', (userInfo) => {
         // save the user info
@@ -42,7 +51,6 @@ io.on('connection', socket => {
         // only allow communications if users are in the same chat room.
     
         socket.on('user-typed-message', (message) => {
-
         // save the user sent messages to the db, along with other user information.
         Messenger.create({ userName: user.userName, message: message, roomType: user.roomType, date: user.time}, function(err, doc) {
             if(err) {
@@ -99,6 +107,7 @@ io.on('connection', socket => {
     })
 });
 
+const PORT = 5500;
 httpServer.listen(PORT, () => {
     console.log(`Server is running at ${PORT}`)
 });
@@ -109,3 +118,5 @@ async function setMessage(messageId, message) {
 
     return messageInfo;
 }
+
+
