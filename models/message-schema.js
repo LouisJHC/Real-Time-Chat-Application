@@ -5,6 +5,12 @@ const messageSchema = new Schema(
         userName: {
             type: String
         },
+        email: {
+            type: String
+        },
+        password: {
+            type: String
+        },
         message: {
             type: String,
         },
