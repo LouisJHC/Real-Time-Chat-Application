@@ -45,7 +45,6 @@ router.post('/signup', (req, res) => {
                 // hash the password before I insert the user document into the db.
                 bcrpyt.genSalt(10, function(err, salt) {
                     bcrpyt.hash(password, salt, function(err, hash) {
-                        console.log(hash);
                         Messenger.create({ userName, email, password: hash }, function(err,doc) {
                             if(err) console.log(err);
             
@@ -53,7 +52,7 @@ router.post('/signup', (req, res) => {
                         });
                     })
                 })
-            
+                req.flash('successMessage', 'You are now successfully registered.');
                 res.redirect('/user/signin')
             }
         }).catch(err => console.log(err));

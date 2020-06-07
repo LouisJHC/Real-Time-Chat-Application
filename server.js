@@ -7,6 +7,26 @@ const messageFormatter = require('./utils/message-formatter');
 const { saveUserInfo, getUsersFromTheRoom, deleteUserInfo } = require('./utils/save-user-information')
 const io = require('socket.io')(httpServer);
 
+// Express session set up with connect-flash to flash messages on redirect.
+// In particular, express session is to store a user state.
+const session = require('express-session');
+const flash = require('connect-flash');
+
+app.use(session({
+    secret: 'session',
+    resave: true,
+    saveUninitialized: false
+}));
+app.use(flash());
+
+// Setting global variables, so I can have different colors for different messages (e.g. Blue for successful sign up and red for failed validation).
+// Flash messages are stored in the sessions.
+app.use((req, res, next) => {
+    res.locals.successMessage = req.flash('successMessage');
+    next();
+})
+
+
 // ejs set up. app.use('layout') should come first.
 app.use(require('express-ejs-layouts'));
 app.set('view engine', 'ejs');

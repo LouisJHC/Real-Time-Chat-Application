@@ -334,5 +334,3 @@ async function getUserMessage(userName, roomType) {
         })
     }
 }
-
-console.log(__dirname);
