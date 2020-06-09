@@ -12,17 +12,28 @@ const io = require('socket.io')(httpServer);
 const session = require('express-session');
 const flash = require('connect-flash');
 
+const passport = require('passport');
+require('./config/authenticate')(passport);
+
 app.use(session({
     secret: 'session',
     resave: true,
     saveUninitialized: false
 }));
+
 app.use(flash());
+
+
+// Passport middleware. These have to be put below the express session line above.
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 // Setting global variables, so I can have different colors for different messages (e.g. Blue for successful sign up and red for failed validation).
 // Flash messages are stored in the sessions.
 app.use((req, res, next) => {
     res.locals.successMessage = req.flash('successMessage');
+    res.locals.error = req.flash('error');
     next();
 })
 
@@ -47,8 +58,6 @@ app.use(express.static(path.join(__dirname, 'public')))
 // Routing. The router should come after static line above, so that staic files will handled first.
 app.use('/', require('./public/js/user'));
 app.use('/user', require('./public/js/user'));
-
-
 
 let messageInfo = {};
 // Socket Communications

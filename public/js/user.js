@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrpyt = require('bcryptjs')
 const Messenger = require('../../models/message-schema');
+const passport = require('passport');
 
 router.get('/index', (req, res) => res.render('index'));
 router.get('/signin', (req, res) => res.render('sign-in'));
@@ -58,4 +59,24 @@ router.post('/signup', (req, res) => {
         }).catch(err => console.log(err));
     } 
 });
+
+
+router.post('/signin', (req, res, next) => {
+    passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/signin',
+    failureFlash: true
+})(req, res, next);
+})
+
+
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+  });
+  
+  passport.deserializeUser((id, done) => {
+    Messenger.findById(id, (err, user) => {
+      done(err, user);
+    });
+  });
 module.exports = router;

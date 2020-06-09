@@ -1,3 +1,4 @@
+<!-- For when the user logs in. -->
 <% if(successMessage != '') { %>
     <div class="alert alert-primary alert-dismissible fade show" role="alert">
         <%= successMessage %>
@@ -7,11 +8,21 @@
     </div>
 <% } %>
 
+<!-- For when the user fails to login. -->
+<% if(error != '') { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <%= error %>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+<% } %>
 
+<!-- For when the user sign up validation fails. -->
 <% if(typeof errorMessages != 'undefined') { %>
     <% errorMessages.forEach(function(message) { %>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <%- message.error %>
+            <%= message.error %>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
