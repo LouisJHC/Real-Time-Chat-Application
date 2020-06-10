@@ -6,7 +6,7 @@ const httpServer = http.createServer(app);
 const messageFormatter = require('./utils/message-formatter');
 const { saveUserInfo, getUsersFromTheRoom, deleteUserInfo } = require('./utils/save-user-information')
 const io = require('socket.io')(httpServer);
-
+const { checkIfAuthenticated } = require('./config/check-if-authenticated');
 // Express session set up with connect-flash to flash messages on redirect.
 // In particular, express session is to store a user state.
 const session = require('express-session');
@@ -55,17 +55,18 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false}));
 
 app.get('/user-info', (req, res) => {
-    // after serailizeUser is called, the result of calling that method is attached to the session, so I can access it using req.session.passport.user.
-    if(typeof req.session.passport !== 'undefined') {
-        res.send(req.session.passport.user.userName);
-    }
+    // After logging in, I can access to user credentials with req.user.
+    res.send(req.user.userName);
 })
 
-app.use(express.static(path.join(__dirname, 'public')));
-
+app.use('/chat', checkIfAuthenticated, express.static(path.join(__dirname, 'public')));
 
 // Routing. The router should come after static line above, so that static files will handled first.
 app.use('/user', require('./public/js/user'));
+
+app.use('/', (req, res) => {
+    res.render('index.ejs');
+})
 
 let messageInfo = {};
 // Socket Communications

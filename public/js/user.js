@@ -4,9 +4,6 @@ const bcrpyt = require('bcryptjs')
 const Messenger = require('../../models/message-schema');
 const passport = require('passport');
 
-router.get('/index', (req, res) => {
-     res.render('index');
-})
 router.get('/signin', (req, res) => res.render('sign-in'));
 router.get('/signup', (req, res) => res.render('sign-up'));
 
@@ -63,12 +60,17 @@ router.post('/signup', (req, res) => {
 
 router.post('/signin', (req, res, next) => {
     passport.authenticate('local', {
-        successRedirect: '/',
+        successRedirect: '/chat',
         failureRedirect: '/user/signin',
         failureFlash: true
 })(req, res, next);
 })
 
+router.get('/signout', (req, res) => {
+    req.logout();
+    req.flash('successMessage', 'You are not logged out.');
+    res.redirect('/user/signin');   
+})
 // serializeUser returns a unique user identifier. Here, user is saved in the session, and it is retrieved with deserializeUser() below.
 passport.serializeUser((user, done) => {
     done(null, user);
