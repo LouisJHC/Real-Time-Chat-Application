@@ -7,6 +7,7 @@ const messageFormatter = require('./utils/message-formatter');
 const { saveUserInfo, getUsersFromTheRoom, deleteUserInfo } = require('./utils/save-user-information')
 const io = require('socket.io')(httpServer);
 const { checkIfAuthenticated } = require('./config/check-if-authenticated');
+
 // Express session set up with connect-flash to flash messages on redirect.
 // In particular, express session is to store a user state.
 const session = require('express-session');
@@ -14,7 +15,6 @@ const flash = require('connect-flash');
 
 const passport = require('passport');
 require('./config/authenticate')(passport);
-
 
 app.use(session({
     secret: 'session',
@@ -54,19 +54,24 @@ app.use(cors());
 // to get the form data with req.body. This line should come above the routing setup below.
 app.use(express.urlencoded({ extended: false}));
 
+
+
+
+// Routing. The router should come after static line above, so that static files will handled first.
+app.use('/user', require('./public/js/user'));
+app.use('/about', (req, res) => {
+    res.render('about.ejs');
+})
+app.use('/chat', checkIfAuthenticated, express.static(path.join(__dirname, 'public')));
 app.get('/user-info', (req, res) => {
     // After logging in, I can access to user credentials with req.user.
     res.send(req.user.userName);
 })
 
-app.use('/chat', checkIfAuthenticated, express.static(path.join(__dirname, 'public')));
-
-// Routing. The router should come after static line above, so that static files will handled first.
-app.use('/user', require('./public/js/user'));
-
-app.use('/', (req, res) => {
+app.get('/', (req, res) => {
     res.render('index.ejs');
 })
+
 
 let messageInfo = {};
 // Socket Communications
@@ -146,7 +151,6 @@ const PORT = 5500;
 httpServer.listen(PORT, (req, res) => {
     console.log(`Server is running at ${PORT}`);
 });
-
 
 async function setMessage(messageId, message) {
     messageInfo.messageId = messageId;

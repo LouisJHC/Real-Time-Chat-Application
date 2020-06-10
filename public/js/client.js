@@ -190,9 +190,11 @@ function removeMessageFromSelf(removedMessageId) {
 
 const currentURL = window.location.href;
 
+let userName = '';
+let roomType = '';
 customURLParser(currentURL).then(data => {
-    const userName = data.userName;
-    const roomType = data.roomType;
+    userName = data.userName;
+    roomType = data.roomType;
     const roomName = document.querySelector('#room-name');
     roomName.innerText = roomType;
     socket.emit('send-username-and-roomtype', { userName: userName, roomType: roomType });

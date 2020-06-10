@@ -1,6 +1,5 @@
 :root {
-	--dark-color-a: #8df13a;
-	--dark-color-b: #86eb33;
+	--dark-color-a: #A8D5BAFF;
 }
 
 * {
@@ -58,7 +57,7 @@ a {
 }
 
 .app-sidebar {
-	background: var(--dark-color-b);
+	background: var(--dark-color-a);
 	color: #fff;
 	padding: 20px 20px 60px;
 	overflow-y: scroll;
@@ -95,7 +94,7 @@ a {
 .app-messages .message .meta {
 	font-size: 15px;
 	font-weight: bold;
-	color: var(--dark-color-b);
+	color: var(--dark-color-a);
 	opacity: 0.7;
 	margin-bottom: 7px;
 }
@@ -136,7 +135,7 @@ a {
 
 .main {
 	padding: 35px 50px;
-	background: var(--dark-color-b);
+	background: var(--dark-color-a);
 }
 
 
@@ -157,15 +156,6 @@ a {
 	height: 35px;
 	padding: 3px;
 	width: 100%;
-}
-
-.main .join-btn {
-	height:20px; 
-    width:100px; 
-    margin: -20px -50px; 
-    position:relative;
-    top:50%; 
-    left:50%;	
 }
 
 .main .form-control {
@@ -213,9 +203,57 @@ a {
 	width: 100%;
 }
   
-  /* The Close Button */
+
 .modal-close-btn {
 	color: #8df13a;
 	font-size: 20px;
 }
+
+.join-btn {
+	background: var(--dark-color-b);
+	color: white;
+	font-size: 15px;
+	height: 30px; 
+    width: 70px; 
+    margin: -20px -50px; 
+    position: relative;
+    top: 50%; 
+	left: 50%;
+	border: none;
+}
+.signout-btn {
+	background-color: #D7A9E3FF;
+	color: white;
+	font-size: 15px;
+	padding: 10px 20px;
+	border: none;
+  }
+
+.chatlog-btn {
+	background-color: #8BBEE8FF;
+	color: white;
+	font-size: 15px;
+	padding: 10px 20px;
+	margin-right: -60%;
+	border: none;
+}
+
+.send-btn {
+	background-color: #FF7F41FF;
+	color: white;
+	font-size: 15px;
+	padding: 10px 10px;
+	margin-left: 5px;
+	border: none;
+}
+
+.delete-btn {
+	background-color: #FF7F41FF;
+	color: white;
+	font-size: 10px;
+	padding: 5px 5px;
+	margin-left: 5px;
+	border: none;
+ }
+
   

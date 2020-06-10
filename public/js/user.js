@@ -46,8 +46,6 @@ router.post('/signup', (req, res) => {
                     bcrpyt.hash(password, salt, function(err, hash) {
                         Messenger.create({ userName, email, password: hash }, function(err,doc) {
                             if(err) console.log(err);
-            
-                            console.log('saved!');
                         });
                     })
                 })

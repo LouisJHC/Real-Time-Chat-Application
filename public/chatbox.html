@@ -12,14 +12,9 @@
     <div class="app-container">
         <header class="app-header">
           <h1><i class="fas fa-smile"></i> Chatpie</h1>
-          <form action="index.html">
-            <!-- <button type="submit">Disconnect</button> -->
-            <a href="/user/signout">Sign Out</a>
-          </form>
+            <button type="submit" class="chatlog-btn" id="chatlog-btn">Show my messages</button>
+            <button type="submit" class="signout-btn" id="signout-btn" onclick="location.href='/user/signout';">Sign Out</button>
         </header>
-        <form action>
-          <button type="submit" style="color:blue; font-size:15px" id="chatlog-btn">Show my messages</button>
-        </form>
         <main class="app-main">
           <div class="app-sidebar">
             <h3><i class="fas fa-comments"></i>Room: </h3>
@@ -38,7 +33,7 @@
         <div class="app-form-container">
           <form id="app-form">
             <input id="messageText" type="text"/>
-            <button class="button">Send Message</button>
+            <button class="send-btn" id="send-btn">Send Message</button>
           </form>
         </div>
     </div>
