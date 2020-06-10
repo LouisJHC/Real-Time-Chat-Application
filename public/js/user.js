@@ -4,7 +4,9 @@ const bcrpyt = require('bcryptjs')
 const Messenger = require('../../models/message-schema');
 const passport = require('passport');
 
-router.get('/index', (req, res) => res.render('index'));
+router.get('/index', (req, res) => {
+     res.render('index');
+})
 router.get('/signin', (req, res) => res.render('sign-in'));
 router.get('/signup', (req, res) => res.render('sign-up'));
 
@@ -32,7 +34,6 @@ router.post('/signup', (req, res) => {
     if(errorMessages.length > 0) {
         res.render('sign-up', {
             errorMessages
-
         })
     } else {
         // if the email already exists in the db, re-render the sign up page.
@@ -60,18 +61,17 @@ router.post('/signup', (req, res) => {
     } 
 });
 
-
 router.post('/signin', (req, res, next) => {
     passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/signin',
-    failureFlash: true
+        successRedirect: '/',
+        failureRedirect: '/user/signin',
+        failureFlash: true
 })(req, res, next);
 })
 
-
+// serializeUser returns a unique user identifier. Here, user is saved in the session, and it is retrieved with deserializeUser() below.
 passport.serializeUser((user, done) => {
-    done(null, user.id);
+    done(null, user);
   });
   
   passport.deserializeUser((id, done) => {
@@ -79,4 +79,5 @@ passport.serializeUser((user, done) => {
       done(err, user);
     });
   });
+
 module.exports = router;

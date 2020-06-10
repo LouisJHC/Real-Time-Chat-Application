@@ -188,47 +188,43 @@ function removeMessageFromSelf(removedMessageId) {
     }
 }
 
-
-
-
-
 const currentURL = window.location.href;
-const { userName, roomType } = customURLParser(currentURL);
 
+customURLParser(currentURL).then(data => {
+    const userName = data.userName;
+    const roomType = data.roomType;
+    const roomName = document.querySelector('#room-name');
+    roomName.innerText = roomType;
+    socket.emit('send-username-and-roomtype', { userName: userName, roomType: roomType });
+});
 // parse the URL and get the userName and the roomType he/she joined
-function customURLParser(currentURL) {
-    let userName = [];
+async function customURLParser(currentURL) {
     let roomType = [];
-    currentURL = currentURL.split('?')[1].split('&');
-    for(let i=0;i<currentURL.length;i++) {
-        for(let j=currentURL[i].length-1;j>=0;j--) {
-            if(currentURL[i][j] === '=') break;
-            // + is to take care of the space entered for the user name.
-            if(i === 0) {
-                if(currentURL[i][j] === '+') {
-                    userName.push(' ');
-                } else {
-                    userName.push(currentURL[i][j]);
-                }
-            } else {
-                if(currentURL[i][j] === '+') {
-                    roomType.push(currentURL[i][j]);
-                } else {
-                roomType.push(currentURL[i][j])
-                }
-            }
-        }
-    }
+    currentURL = currentURL.split('?')[1];
 
-    userName = userName.reverse().join("");
+
+    for(let i=currentURL.length-1;i>=0;i--) {
+        if(currentURL[i] === '=') break;
+        roomType.push(currentURL[i]);
+    }
     roomType = roomType.reverse().join("");
-    return { userName: userName, roomType: roomType};
+    
+    let userName = '';
+    await getUserName().then(data => userName = data);
+    
+    return { userName, roomType };
 } 
 
-const roomName = document.querySelector('#room-name');
-roomName.innerText = roomType;
-socket.emit('send-username-and-roomtype', { userName: userName, roomType: roomType });
+// get the userName that was
+async function getUserName() {
+    const response = await fetch('/user-info');
+    let returnValue = '';
+    await response.text().then(data => returnValue = data);
 
+    return returnValue;
+ 
+
+}
 const modal = document.querySelector('.modal');
 const chatLog = document.querySelector('#chatlog-btn');
 const modalCloseBtn = document.querySelector('.modal-close-btn');

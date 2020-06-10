@@ -15,6 +15,7 @@ const flash = require('connect-flash');
 const passport = require('passport');
 require('./config/authenticate')(passport);
 
+
 app.use(session({
     secret: 'session',
     resave: true,
@@ -27,7 +28,6 @@ app.use(flash());
 // Passport middleware. These have to be put below the express session line above.
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 // Setting global variables, so I can have different colors for different messages (e.g. Blue for successful sign up and red for failed validation).
 // Flash messages are stored in the sessions.
@@ -54,9 +54,17 @@ app.use(cors());
 // to get the form data with req.body. This line should come above the routing setup below.
 app.use(express.urlencoded({ extended: false}));
 
-app.use(express.static(path.join(__dirname, 'public')))
-// Routing. The router should come after static line above, so that staic files will handled first.
-app.use('/', require('./public/js/user'));
+app.get('/user-info', (req, res) => {
+    // after serailizeUser is called, the result of calling that method is attached to the session, so I can access it using req.session.passport.user.
+    if(typeof req.session.passport !== 'undefined') {
+        res.send(req.session.passport.user.userName);
+    }
+})
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+
+// Routing. The router should come after static line above, so that static files will handled first.
 app.use('/user', require('./public/js/user'));
 
 let messageInfo = {};
@@ -95,7 +103,6 @@ io.on('connection', socket => {
         
 
         app.delete('/message/delete/:id', (req, res) => {
-  
             let messageId = req.params.id;
             Messenger.deleteOne({ _id: messageId }, function(err, doc) {
             if(err) {
@@ -103,7 +110,6 @@ io.on('connection', socket => {
             } 
                 res.send(doc);
             })
-
         })
         
         // when the user deleted his/her messages in the chat box.
@@ -132,14 +138,14 @@ io.on('connection', socket => {
                 res.send(doc);
             })
         })
-    
     })
 });
 
 const PORT = 5500;
-httpServer.listen(PORT, () => {
-    console.log(`Server is running at ${PORT}`)
+httpServer.listen(PORT, (req, res) => {
+    console.log(`Server is running at ${PORT}`);
 });
+
 
 async function setMessage(messageId, message) {
     messageInfo.messageId = messageId;
